@@ -25,7 +25,7 @@ Accuracy plot and loss plot is displayed on [Tensorboard](https://www.tensorflow
 The model is constructed with **2 hidden layers (64 and 32 nodes)**, with added **Dropout** and **BatchNormalization** on both layers:
 ![model](static/model.png)
 
-Optimizer, validation methods and callback parameters are as such:
+**Optimizer**, **validation** methods and **callback** parameters are as such:
 ![model_param](static/model_param.png)
 
 # Dataset Summary
