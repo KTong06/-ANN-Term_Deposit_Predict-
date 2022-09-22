@@ -7,8 +7,23 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white)
 <a><img alt='love' src="http://ForTheBadge.com/images/badges/built-with-love.svg"></a>
 
-# [ANN] To Deposit or Not Deposit? -Customer Segmentation-
+# [ANN] To Deposit or Not Deposit? --
  Hi guys good to see you again! This would be my third project where I build a neural network model that helps to predict whether a customer would invest in a term deposit at a bank which would be extremely helpful in providing guidance or maneuver a company's bussiness strategy. Credits to [Kunal Gupta](https://www.kaggle.com/kunalgupta2616) for the [dataset](https://www.kaggle.com/datasets/kunalgupta2616/hackerearth-customer-segmentation-hackathon)! Without further ado lets begin:
+ 
+ # [MODEL UPDATE] 
+Application of SMOTE+ENN resamples data by performing oversampling on the minority class (subscribe term deposit) and undersampling on the majority class (not subscribing term deposit) hence bringing output to a balanced proportion:
+ 
+ ![smenn_balance](static/smenn_y.png)
+ 
+ Although improvement on overall accuracy is mild (**90%** to **91%**), precision and recall scores for positive cases showed significant improvement:
+ |     Classification Report     |       Confusion Matrix       |
+ |-------------------------------|------------------------------|
+ ![smenn_cr](static/smenn_cr.png)|[smenn_conmat](static/smenn_conmat.png)
+ 
+ |    Accuracy Plot     |       Loss Plot       |
+ |----------------------|-----------------------|
+ |![smenn_acc](static/smenn_acc.png)|![smenn_loss](static/smenn_loss.png)|
+ 
  
  # Model Accuracy
  This model has achieved **90%** accuracy: (1-Subscribe term deposit, 0-**NOT** subscribing term deposit)
