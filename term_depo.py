@@ -11,6 +11,9 @@ import datetime
 import numpy as np
 import pandas as pd
 import missingno as msno
+from collections import Counter
+from imblearn.over_sampling import SMOTE,ADASYN
+from imblearn.combine import SMOTETomek,SMOTEENN
 from sklearn.preprocessing import LabelEncoder,OneHotEncoder,MinMaxScaler
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
@@ -148,7 +151,7 @@ for i in np.delete(num_data,-2):
     lr.fit(np.expand_dims(df_clean[i],axis=-1),df_clean['term_deposit_subscribed'])
     print('{}: R^2 is {}'.format(i,lr.score(np.expand_dims(df_clean[i],axis=-1),df_clean['term_deposit_subscribed'])))
 
-# All numeric features listed in 'num_data' displayed at least89% accuracy, 
+# All numeric features listed in 'num_data' displayed at least 89% accuracy, 
 # inferring the numeric features have good correlation to target feature
 
 # Check correlation of categorical features to target
@@ -165,24 +168,40 @@ X=df_clean.loc[:,np.delete(num_data,-2)]
 Y=df_clean['term_deposit_subscribed']
 
 #%% PREPROCESSING
+# Balancing dataset using SMOTE
+# smt=SMOTE()
+# ada=ADASYN()
+# smtom=SMOTETomek()
+smenn=SMOTEENN()
+
+# x_smt,y_smt=smt.fit_resample(X,Y)
+# x_ada,y_ada=ada.fit_resample(X,Y)
+# x_smtom,y_smtom=smtom.fit_resample(X,Y)
+x_smenn,y_smenn=smenn.fit_resample(X,Y)
+
+print('Before: ',Counter(Y))
+print('After: ',Counter(y_smenn))
+
+
 # Normalize input features
 mms=MinMaxScaler()
-X=mms.fit_transform(X)
+x_smenn=mms.fit_transform(x_smenn)
 
 with open(MMS_PICKLE_PATH,'wb') as file:
     pickle.dump(mms,file)
 
 # Apply OHE on target column
 ohe=OneHotEncoder(sparse=False)
-Y=ohe.fit_transform(np.expand_dims(Y,axis=-1))
+y_smenn=ohe.fit_transform(np.expand_dims(y_smenn,axis=-1))
 
 with open(OHE_PICKLE_PATH,'wb') as file:
     pickle.dump(ohe,file)
 
 # Create train and test data
-x_train,x_test,y_train,y_test=train_test_split(X,Y,test_size=0.3,
-                                               random_state=123)
-                                               
+x_train,x_test,y_train,y_test=train_test_split(x_smenn,y_smenn,test_size=0.2,
+                                               random_state=123,
+                                               stratify=(y_smenn))
+
 #%% MODEL BUILDING
 nmod=nn.NeuralNetworkModel()
 model=nmod.two_layer_model(x_train,y_train,64,32,0.2,activ='softmax')
@@ -191,15 +210,15 @@ plot_model(model,show_shapes=(True))
 model.compile(optimizer='adam',loss='categorical_crossentropy',metrics='acc')
 
 tensorboard=TensorBoard(log_dir=LOG_PATH)
-earlystop=EarlyStopping(monitor='val_loss',patience=10)
+earlystop=EarlyStopping(monitor='val_loss',patience=20)
 
-hist=model.fit(x_train,y_train,batch_size=128,epochs=100,verbose=2,
-               validation_data=(x_test,y_test),
-               callbacks=[tensorboard,earlystop])
+hist=model.fit(x_train,y_train,batch_size=128,epochs=500,verbose=2,
+                validation_data=(x_test,y_test),
+                callbacks=[tensorboard,earlystop])
 
 #%% MODEL EVALUATION
 nmod.eval_plot(hist)
-nmod.model_eval(model,x_test,y_test,label=['Success','Failure'])
+nmod.model_eval(model,x_test,y_test,label=[0,1])
 
 # loss,acc [0.23, 0.90]
 
